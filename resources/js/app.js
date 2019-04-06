@@ -4,13 +4,15 @@ require("./bootstrap");
  * load modules
  */
 window.Vue = require("vue");
-
 window.VueRouter = require("vue-router").default;
 window.VueAxios = require("vue-axios").default;
 window.Axios = require("axios").default;
-
 /**
- * Init component
+ * inject all modules
+ */
+Vue.use(VueRouter, VueAxios, Axios);
+/**
+ * Init components
  */
 const ListPosts = Vue.component(
     "Listposts",
@@ -44,94 +46,63 @@ const Register = Vue.component(
     "Register",
     require("./components/Register.vue").default
 );
-
-
 /**
- * Base API URI
- */
-const base = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api'
-})
-
-/**
- * inject all dependencies
- */
-Vue.prototype.$vAxios = base
-Vue.use(VueRouter, VueAxios, Axios);
-
-
-
-/**
- * MiddleWares
+ * import MiddleWares
  * Auth and Redirect if user already logedin
  */
-const auth = function (to, from, next) {
-    if (!localStorage.getItem('token')) {
-        return console.log(router.push({name : "Login"}));
-    }
-    return next();
-}
-const redirectIfAuth = function (to, from, next) {
-    if (localStorage.getItem('token')) {
-        return console.log(router.push({ name: "Listposts" }));
-    }
-    return next();
-}
-
-
+import Auth from "./Middleware/Auth.js";
+import RedirectIfAuth from "./Middleware/RedirectIfAuth.js";
 /**
  * Init routes list
  */
-
 const routes = [
     {
         name: "Listposts",
         path: "/",
         component: ListPosts,
-        beforeEnter: auth
-
+        beforeEnter: Auth
     },
     {
         name: "Addpost",
         path: "/add-post",
         component: AddPost,
-        beforeEnter: auth
+        beforeEnter: Auth
     },
     {
         name: "EditPost",
         path: "/edit/:id",
         component: EditPost,
-        beforeEnter: auth
+        beforeEnter: Auth
     },
     {
         name: "DeletePost",
         path: "/delete/:id",
         component: DeletePost,
-        beforeEnter: auth
+        beforeEnter: Auth
     },
     {
         name: "ViewPost",
         path: "/view/:id",
         component: ViewPost,
-        beforeEnter: auth
+        beforeEnter: Auth
     },
     {
         name: "Login",
         path: "/login",
         component: Login,
-        beforeEnter: redirectIfAuth
+        beforeEnter: RedirectIfAuth
     },
     {
         name: "Register",
         path: "/register",
         component: Register,
-        beforeEnter: redirectIfAuth
+        beforeEnter: RedirectIfAuth
     },
     {
-        name: "Logout" ,
-        path: "/logout" ,
-        component: Logout ,
-        beforeEnter: auth,
+        name: "Logout",
+        path: "/logout",
+        component: Logout,
+        beforeEnter: Auth
     }
 ];
 /**
@@ -140,7 +111,13 @@ const routes = [
 const router = new VueRouter({
     routes: routes
 });
-
+/**
+ * Base API URI
+ */
+const base = axios.create({
+    baseURL: 'http://127.0.0.1:8000/api'
+})
+Vue.prototype.$vAxios = base;
 /**
  * init App
  */

@@ -52848,13 +52848,61 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./resources/js/Middleware/Auth.js":
+/*!*****************************************!*\
+  !*** ./resources/js/Middleware/Auth.js ***!
+  \*****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Auth; });
+function Auth(to, from, next) {
+  if (!localStorage.getItem('token')) {
+    return next({
+      name: "Login"
+    });
+  }
+
+  return next();
+}
+
+/***/ }),
+
+/***/ "./resources/js/Middleware/RedirectIfAuth.js":
+/*!***************************************************!*\
+  !*** ./resources/js/Middleware/RedirectIfAuth.js ***!
+  \***************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return RedirectIfAuth; });
+function RedirectIfAuth(to, from, next) {
+  if (localStorage.getItem('token')) {
+    return next({
+      name: "Listposts"
+    });
+  }
+
+  return next();
+}
+
+/***/ }),
+
 /***/ "./resources/js/app.js":
 /*!*****************************!*\
   !*** ./resources/js/app.js ***!
   \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Middleware/Auth.js */ "./resources/js/Middleware/Auth.js");
+/* harmony import */ var _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Middleware/RedirectIfAuth.js */ "./resources/js/Middleware/RedirectIfAuth.js");
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 /**
  * load modules
@@ -52866,7 +52914,12 @@ window.VueRouter = __webpack_require__(/*! vue-router */ "./node_modules/vue-rou
 window.VueAxios = __webpack_require__(/*! vue-axios */ "./node_modules/vue-axios/dist/vue-axios.min.js").default;
 window.Axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js").default;
 /**
- * Init component
+ * inject all modules
+ */
+
+Vue.use(VueRouter, VueAxios, Axios);
+/**
+ * Init components
  */
 
 var ListPosts = Vue.component("Listposts", __webpack_require__(/*! ./components/ListPosts.vue */ "./resources/js/components/ListPosts.vue").default);
@@ -52878,87 +52931,56 @@ var Login = Vue.component("Login", __webpack_require__(/*! ./components/Login.vu
 var Logout = Vue.component("Logout", __webpack_require__(/*! ./components/Logout.vue */ "./resources/js/components/Logout.vue").default);
 var Register = Vue.component("Register", __webpack_require__(/*! ./components/Register.vue */ "./resources/js/components/Register.vue").default);
 /**
- * Base API URI
- */
-
-var base = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api'
-});
-/**
- * inject all dependencies
- */
-
-Vue.prototype.$vAxios = base;
-Vue.use(VueRouter, VueAxios, Axios);
-/**
- * MiddleWares
+ * import MiddleWares
  * Auth and Redirect if user already logedin
  */
 
-var auth = function auth(to, from, next) {
-  if (!localStorage.getItem('token')) {
-    return console.log(router.push({
-      name: "Login"
-    }));
-  }
 
-  return next();
-};
 
-var redirectIfAuth = function redirectIfAuth(to, from, next) {
-  if (localStorage.getItem('token')) {
-    return console.log(router.push({
-      name: "Listposts"
-    }));
-  }
-
-  return next();
-};
 /**
  * Init routes list
  */
-
 
 var routes = [{
   name: "Listposts",
   path: "/",
   component: ListPosts,
-  beforeEnter: auth
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, {
   name: "Addpost",
   path: "/add-post",
   component: AddPost,
-  beforeEnter: auth
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, {
   name: "EditPost",
   path: "/edit/:id",
   component: EditPost,
-  beforeEnter: auth
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, {
   name: "DeletePost",
   path: "/delete/:id",
   component: DeletePost,
-  beforeEnter: auth
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, {
   name: "ViewPost",
   path: "/view/:id",
   component: ViewPost,
-  beforeEnter: auth
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, {
   name: "Login",
   path: "/login",
   component: Login,
-  beforeEnter: redirectIfAuth
+  beforeEnter: _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }, {
   name: "Register",
   path: "/register",
   component: Register,
-  beforeEnter: redirectIfAuth
+  beforeEnter: _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }, {
   name: "Logout",
   path: "/logout",
   component: Logout,
-  beforeEnter: auth
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
 }];
 /**
  * Init Vue Router
@@ -52967,6 +52989,14 @@ var routes = [{
 var router = new VueRouter({
   routes: routes
 });
+/**
+ * Base API URI
+ */
+
+var base = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api'
+});
+Vue.prototype.$vAxios = base;
 /**
  * init App
  */
