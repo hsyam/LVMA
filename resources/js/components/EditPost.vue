@@ -32,11 +32,8 @@
 export default {
     data:function(){
         return {
-            post:{
-                title : "" ,
-                body : "" ,
-
-            } ,
+            post:"" ,
+            user: this.crUser(),
             sussess : false,
             err : false,
         }
@@ -48,10 +45,13 @@ export default {
             this.$vAxios.get(uri).then((res)=>{
                 this.post = res.data;
                 document.title = "Edit | "+this.post.title;
+                if(this.post.user_id != this.user.id){
+                    return this.$router.push({name : 'Listposts'});
+                }
             })
+
         },
         EditPost: function(){
-
             let uri = 'post/' + this.$route.params.id;
 
             this.$vAxios.patch(uri , this.post).then((res)=>{
@@ -64,11 +64,17 @@ export default {
                 this.sussess = false;
             }
             )
+        },
+        crUser:function () {
+            if(localStorage.getItem('user')){
+                return JSON.parse(localStorage.getItem('user'))
+                }
+                return {name :"" , email : ""}
         }
     },
     mounted(){
          this.load()
-        console.log(this.post.title);
+
     }
 
 }

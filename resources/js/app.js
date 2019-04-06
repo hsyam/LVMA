@@ -7,6 +7,8 @@ window.Vue = require("vue");
 window.VueRouter = require("vue-router").default;
 window.VueAxios = require("vue-axios").default;
 window.Axios = require("axios").default;
+
+import _ from 'lodash'
 /**
  * inject all modules
  */
@@ -118,6 +120,7 @@ const base = axios.create({
     baseURL: 'http://127.0.0.1:8000/api'
 })
 Vue.prototype.$vAxios = base;
+Vue.prototype.$_ = _ ;
 /**
  * init App
  */

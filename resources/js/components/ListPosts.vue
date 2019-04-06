@@ -31,10 +31,32 @@
                 <td>{{post.body}}</td>
                 <td>
                     <router-link class="btn btn-xs btn-info" v-bind:to="{name : 'ViewPost' , params: {id:post.id} }">Show</router-link>
-                    <router-link class="btn btn-xs btn-warning" v-bind:to="{name : 'EditPost' , params: {id:post.id} }">Edit</router-link>
-                    <router-link class="btn btn-xs btn-danger" v-bind:to="{name : 'DeletePost' , params: {id:post.id} }">Delete</router-link>
+                    <router-link v-if="post.user_id == user.id" class="btn btn-xs btn-warning" v-bind:to="{name : 'EditPost' , params: {id:post.id} }">Edit</router-link>
+                    <!-- <router-link  v-if="post.user_id == user.id" class="btn btn-xs btn-danger" v-bind:to="{name : 'DeletePost' , params: {id:post.id} }">Delete</router-link> -->
+                <button  v-if="post.user_id == user.id" type="button" class="btn btn-danger" data-toggle="modal" :data-target="'#item'+ '-' + post.id">
+                Delete
+                </button>
+                <!-- Modal -->
+                    <div  v-if="post.user_id == user.id" class="modal fade" :id="'item'+ '-' + post.id" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Delete Alert</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure to delete <strong>{{post.title}}</strong>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-danger" v-on:click="doDelete(post.id)" data-dismiss="modal">Yes</button>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
                 </td>
-
             </tr>
         </tbody>
     </table>
@@ -46,7 +68,6 @@
 export default {
     mounted() {
         this.load()
-        document.title = "Posts"
     },
     data:function(){
         return {
@@ -56,6 +77,7 @@ export default {
     },
     methods:{
         load : function(){
+        document.title = "Posts"
 
             let uri = 'post';
             this.$vAxios.defaults.headers.common['Authorization'] = `Bearer `+localStorage.getItem('token');
@@ -63,13 +85,26 @@ export default {
                 this.posts = res.data;
             })
 
-
-    },
+        },
         crUser :  function(){
             if(localStorage.getItem('user')){
                 return JSON.parse(localStorage.getItem('user'))
                 }
                 return {name :"" , email : ""}
+            },
+            doDelete:function(id){
+                let uri = 'post/'+id
+                this.$vAxios.defaults.headers.common['Authorization'] = `Bearer `+localStorage.getItem('token');
+                this.$vAxios.delete(uri).then((res)=>{
+                    this.posts = this.$_.reject(this.posts , (post)=>{
+                        return post.id == id
+                    });
+                }).catch((err)=>{
+                    alert("cant delete")
+                })
+
+
+
             }
 
     }, computed: {

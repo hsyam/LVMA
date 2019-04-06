@@ -1943,10 +1943,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      post: {
-        title: "",
-        body: ""
-      },
+      post: "",
+      user: this.crUser(),
       sussess: false,
       err: false
     };
@@ -1960,6 +1958,12 @@ __webpack_require__.r(__webpack_exports__);
       this.$vAxios.get(uri).then(function (res) {
         _this.post = res.data;
         document.title = "Edit | " + _this.post.title;
+
+        if (_this.post.user_id != _this.user.id) {
+          return _this.$router.push({
+            name: 'Listposts'
+          });
+        }
       });
     },
     EditPost: function EditPost() {
@@ -1973,11 +1977,20 @@ __webpack_require__.r(__webpack_exports__);
         _this2.err = true;
         _this2.sussess = false;
       });
+    },
+    crUser: function crUser() {
+      if (localStorage.getItem('user')) {
+        return JSON.parse(localStorage.getItem('user'));
+      }
+
+      return {
+        name: "",
+        email: ""
+      };
     }
   },
   mounted: function mounted() {
     this.load();
-    console.log(this.post.title);
   }
 });
 
@@ -2036,10 +2049,31 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
     this.load();
-    document.title = "Posts";
   },
   data: function data() {
     return {
@@ -2051,6 +2085,7 @@ __webpack_require__.r(__webpack_exports__);
     load: function load() {
       var _this = this;
 
+      document.title = "Posts";
       var uri = 'post';
       this.$vAxios.defaults.headers.common['Authorization'] = "Bearer " + localStorage.getItem('token');
       this.$vAxios.get(uri).then(function (res) {
@@ -2066,6 +2101,19 @@ __webpack_require__.r(__webpack_exports__);
         name: "",
         email: ""
       };
+    },
+    doDelete: function doDelete(id) {
+      var _this2 = this;
+
+      var uri = 'post/' + id;
+      this.$vAxios.defaults.headers.common['Authorization'] = "Bearer " + localStorage.getItem('token');
+      this.$vAxios.delete(uri).then(function (res) {
+        _this2.posts = _this2.$_.reject(_this2.posts, function (post) {
+          return post.id == id;
+        });
+      }).catch(function (err) {
+        alert("cant delete");
+      });
     }
   },
   computed: {
@@ -37724,25 +37772,101 @@ var render = function() {
                   [_vm._v("Show")]
                 ),
                 _vm._v(" "),
-                _c(
-                  "router-link",
-                  {
-                    staticClass: "btn btn-xs btn-warning",
-                    attrs: { to: { name: "EditPost", params: { id: post.id } } }
-                  },
-                  [_vm._v("Edit")]
-                ),
+                post.user_id == _vm.user.id
+                  ? _c(
+                      "router-link",
+                      {
+                        staticClass: "btn btn-xs btn-warning",
+                        attrs: {
+                          to: { name: "EditPost", params: { id: post.id } }
+                        }
+                      },
+                      [_vm._v("Edit")]
+                    )
+                  : _vm._e(),
                 _vm._v(" "),
-                _c(
-                  "router-link",
-                  {
-                    staticClass: "btn btn-xs btn-danger",
-                    attrs: {
-                      to: { name: "DeletePost", params: { id: post.id } }
-                    }
-                  },
-                  [_vm._v("Delete")]
-                )
+                post.user_id == _vm.user.id
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger",
+                        attrs: {
+                          type: "button",
+                          "data-toggle": "modal",
+                          "data-target": "#item" + "-" + post.id
+                        }
+                      },
+                      [_vm._v("\n                Delete\n                ")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                post.user_id == _vm.user.id
+                  ? _c(
+                      "div",
+                      {
+                        staticClass: "modal fade",
+                        attrs: {
+                          id: "item" + "-" + post.id,
+                          tabindex: "-1",
+                          role: "dialog",
+                          "aria-labelledby": "exampleModalLabel",
+                          "aria-hidden": "true"
+                        }
+                      },
+                      [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "modal-dialog",
+                            attrs: { role: "document" }
+                          },
+                          [
+                            _c("div", { staticClass: "modal-content" }, [
+                              _vm._m(1, true),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "modal-body" }, [
+                                _vm._v(
+                                  "\n                            Are you sure to delete "
+                                ),
+                                _c("strong", [_vm._v(_vm._s(post.title))])
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "modal-footer" }, [
+                                _c(
+                                  "button",
+                                  {
+                                    staticClass: "btn btn-secondary",
+                                    attrs: {
+                                      type: "button",
+                                      "data-dismiss": "modal"
+                                    }
+                                  },
+                                  [_vm._v("Close")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "button",
+                                  {
+                                    staticClass: "btn btn-danger",
+                                    attrs: {
+                                      type: "button",
+                                      "data-dismiss": "modal"
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.doDelete(post.id)
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Yes")]
+                                )
+                              ])
+                            ])
+                          ]
+                        )
+                      ]
+                    )
+                  : _vm._e()
               ],
               1
             )
@@ -37768,6 +37892,31 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("td", [_vm._v("action")])
       ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-header" }, [
+      _c(
+        "h5",
+        { staticClass: "modal-title", attrs: { id: "exampleModalLabel" } },
+        [_vm._v("Delete Alert")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
     ])
   }
 ]
@@ -52901,8 +53050,10 @@ function RedirectIfAuth(to, from, next) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Middleware/Auth.js */ "./resources/js/Middleware/Auth.js");
-/* harmony import */ var _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Middleware/RedirectIfAuth.js */ "./resources/js/Middleware/RedirectIfAuth.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Middleware/Auth.js */ "./resources/js/Middleware/Auth.js");
+/* harmony import */ var _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Middleware/RedirectIfAuth.js */ "./resources/js/Middleware/RedirectIfAuth.js");
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 /**
  * load modules
@@ -52913,6 +53064,7 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 window.VueRouter = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.esm.js").default;
 window.VueAxios = __webpack_require__(/*! vue-axios */ "./node_modules/vue-axios/dist/vue-axios.min.js").default;
 window.Axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js").default;
+
 /**
  * inject all modules
  */
@@ -52945,42 +53097,42 @@ var routes = [{
   name: "Listposts",
   path: "/",
   component: ListPosts,
-  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }, {
   name: "Addpost",
   path: "/add-post",
   component: AddPost,
-  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }, {
   name: "EditPost",
   path: "/edit/:id",
   component: EditPost,
-  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }, {
   name: "DeletePost",
   path: "/delete/:id",
   component: DeletePost,
-  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }, {
   name: "ViewPost",
   path: "/view/:id",
   component: ViewPost,
-  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }, {
   name: "Login",
   path: "/login",
   component: Login,
-  beforeEnter: _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
+  beforeEnter: _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_2__["default"]
 }, {
   name: "Register",
   path: "/register",
   component: Register,
-  beforeEnter: _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
+  beforeEnter: _Middleware_RedirectIfAuth_js__WEBPACK_IMPORTED_MODULE_2__["default"]
 }, {
   name: "Logout",
   path: "/logout",
   component: Logout,
-  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  beforeEnter: _Middleware_Auth_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }];
 /**
  * Init Vue Router
@@ -52997,6 +53149,7 @@ var base = axios.create({
   baseURL: 'http://127.0.0.1:8000/api'
 });
 Vue.prototype.$vAxios = base;
+Vue.prototype.$_ = lodash__WEBPACK_IMPORTED_MODULE_0___default.a;
 /**
  * init App
  */
